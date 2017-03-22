@@ -2,6 +2,8 @@ import json
 import os
 import sys
 import codecs
+import csv
+
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
@@ -14,8 +16,26 @@ files = {}
 wrongfiles = []
 goodfiles = []
 root = ''
+
+def storeHospital(hospitalobject):
+    with open('duplicateHospitals.csv', 'ab') as csvfile:
+        fieldnames = ['referralId', 'name']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames,dialect='excel')
+        writer.writerow({'referralId': hospitalobject['referralId'], 'name': hospitalobject['name']})
+
+    with open('duplicateHospitals.csv','r') as in_file, open('singleHospitals.csv','w') as out_file:
+        seen = set() # set for fast O(1) amortized lookup
+        for line in in_file:
+            if line in seen: continue # skip duplicate
+
+            seen.add(line)
+            out_file.write(line)
+
+    return
+
+
 # Traverse root directory, and list directories as dirs and files as files
-for root, dirs, files in os.walk("./collection/"):
+for root, dirs, files in os.walk("./collectionT/"):
     continue
 
 # Drop error files, keep good files
@@ -26,7 +46,7 @@ for filename in files:
         goodfiles.append(filename)
 
 for filename in goodfiles:
-    filename = './collection/' + filename
+    filename = './collectionT/' + filename
     with open(filename, 'r') as f:
         data = json.load(f)
 	
@@ -52,6 +72,8 @@ for filename in goodfiles:
 	    else:
 	        url = venue['url']
 		
+	    hospitalObject = {'referralId': referralId, 'name': name}
+	    storeHospital(hospitalObject)
 	    #sys.stdout.write("{0} - {1} - ({2}, {3}) - {4}".format(referralId, name, latitude, longitude, url))
 
 print("Amount of cities: {0}".format(len(files)))	
