@@ -5,11 +5,8 @@ import requests
 import unicodedata
 import time
 import math
-#import geopy
-#from geopy.distance import VincentyDistance
 
 key = ''
-#url = ''
 output = 'json'
 type = 'hospital'
 
@@ -42,7 +39,7 @@ def getHospitalsWithinRange(latitude, longitude, radius, nextpagetoken):
             jsonresult3 = r3.json()
             return [jsonresult, jsonresult2, jsonresult3]   # Return the result of 3 pages 
         else:
-            return [jsonresult,jsonOtherresult]             # Return the result of 2 pages 
+            return [jsonresult,jsonresult2]             # Return the result of 2 pages 
     else:
         return [jsonresult]                                 # Return the result of 1 page
 
@@ -63,34 +60,36 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
     
     if len(hospitals) == 60:
         print('found more than 60 hospitals')
-        hospitals = []
+        #myhospitalcollection = []
         halfradius = radius/2
         print(halfradius)
         #brng = [22.5,67.5,112.5,157.5]
-        brng = [45,90,135,180]
+        brng = [45,135,225,315]
+        #brng = [45,90,135,180]
+        #brng = [45,180,270,360]
         for br in brng:
-            #print(br)
+            print(br)
             (lat,lon) = reversehaversine(latitude,longitude,halfradius,br)
             res = getAllHospitalsWithinRange(lat,lon,halfradius)
             hospitals.append(res)
+        return hospitals
+        
     print("returning " + str(len(hospitals)) + " hospitals")        
     return hospitals
 
 # haversine formula reversed
 # current function is strongly based on http://stackoverflow.com/questions/7222382/get-lat-long-given-current-point-distance-and-bearing
-# bearing (in radians, clockwise from north
+# bearing (in radians, clockwise from north)
 def reversehaversine(lat,lon,d,brng):
-    R = 6371      #Radius of the Earth from wikipedia
+    R = 6371.0      #Radius of the Earth from wikipedia
     brng = math.radians(brng)
     d = d/1000
-    #brng = math.radians(90)     #Bearing is 90 degrees converted to radians. TODO: DELETE
-    #d = 15          #Distance in km TODO: DELETE
-    #lat = 52.20472  #Original lat TODO: DELETE
-    #long = 0.14056  #Orginial long TODO: DELETE
+
     lat1 = math.radians(float(lat)) #Current lat point converted to radians
     lon1 = math.radians(float(lon)) #Current long point converted to radians
-    print("(" + str(latitude) + "," + str(longitude) + ")")
+
     lat2 = math.asin( math.sin(lat1)*math.cos(d/R) + math.cos(lat1)*math.sin(d/R)*math.cos(brng))
+    
     lon2 = lon1 + math.atan2(math.sin(brng)*math.sin(d/R)*math.cos(lat1), math.cos(d/R)-math.sin(lat1)*math.sin(lat2))
     
     lat2 = math.degrees(lat2)
