@@ -6,10 +6,10 @@ import unicodedata
 import time
 import math
 
+# Chosen Google Places API Values for all calls
 key = ''
 output = 'json'
 type = 'hospital'
-
 
 # Get user key if provided, else ask for it
 try:
@@ -20,20 +20,20 @@ except IndexError:
 # Return a list of jsonresults given the paramaters to Google Places
 def getHospitalsWithinRange(latitude, longitude, radius, nextpagetoken):
     url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/' + output + '?location=' + str(latitude) + ',' + str(longitude) + '&radius=' + str(radius) +'&type=' + type + '&key=' + key + '&pagetoken=' + str(nextpagetoken)
-    print url
+    print((50000/radius-1)*'\t' + url)
     r = requests.get(url)
     jsonresult = r.json()
 
     if("next_page_token" in jsonresult):        # When a query has more than 20 results
         nextpagetoken = jsonresult['next_page_token']
-        print(url+str(nextpagetoken))
+        #print((50000/radius-1)*'\t' + url+str(nextpagetoken))
         time.sleep(2)                           # Wait for nextpage to be ready
         r2 = requests.get(url+str(nextpagetoken))
         jsonresult2 = r2.json()
         
         if("next_page_token" in jsonresult2):   # When a query has more than 40 
             nextpagetoken = jsonresult2['next_page_token']
-            print(url+str(nextpagetoken))
+            #print((50000/radius-1)*'\t' + url+str(nextpagetoken))
             time.sleep(2)                       # Wait for nextpage to be ready
             r3 = requests.get(url+str(nextpagetoken))    
             jsonresult3 = r3.json()
@@ -43,7 +43,7 @@ def getHospitalsWithinRange(latitude, longitude, radius, nextpagetoken):
     else:
         return [jsonresult]                                 # Return the result of 1 page
 
-# Return a clean list of (at most 60) hospitals given a list of jsonresults Google Places        
+# Return a clean list of (at most 60) hospitals given a list of jsonresults from Google Places        
 def fetchHospitalResult(jsonresultlist):
     hospitalList = []
     for jsonresult in jsonresultlist:
@@ -60,13 +60,12 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
     
     if len(hospitals) == 60:
         print('found 60 or more hospitals!')
-        #myhospitalcollection = []
         halfradius = radius/2
         print(halfradius)
         #brng = [22.5,67.5,112.5,157.5]
-        brng = [45,135,225,315]
+        brng = [45.0,135.0,225.0,315.0]
         #brng = [45,90,135,180]
-        #brng = [45,180,270,360]
+        #brng = [90,180,270,360]
         for br in brng:
             print(br)
             (lat,lon) = reversehaversine(latitude,longitude,halfradius,br)
@@ -74,6 +73,7 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
             hospitals.extend(res)
         print("added " + str(len(res)) + " of " + str(len(hospitals)) + " current total hospitals ") 
         return hospitals
+        
         
     print("returning " + str(len(hospitals)) + " hospitals")        
     return hospitals
@@ -106,6 +106,7 @@ def reversehaversine(lat,lon,d,brng):
 latitude = 38.0000
 longitude = -97.0000
 radius = 50000
+
 hosp = getAllHospitalsWithinRange(latitude, longitude, radius);
 print(len(hosp))
 
