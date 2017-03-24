@@ -59,7 +59,7 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
     print("(" + str(latitude) + "," + str(longitude) + ")")
     
     if len(hospitals) == 60:
-        print('found more than 60 hospitals')
+        print('found 60 or more hospitals!')
         #myhospitalcollection = []
         halfradius = radius/2
         print(halfradius)
@@ -71,7 +71,8 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
             print(br)
             (lat,lon) = reversehaversine(latitude,longitude,halfradius,br)
             res = getAllHospitalsWithinRange(lat,lon,halfradius)
-            hospitals.append(res)
+            hospitals.extend(res)
+        print("added " + str(len(res)) + " of " + str(len(hospitals)) + " current total hospitals ") 
         return hospitals
         
     print("returning " + str(len(hospitals)) + " hospitals")        
@@ -100,25 +101,15 @@ def reversehaversine(lat,lon,d,brng):
     
     return (lat2, lon2)
     
-    
-    
-
-
-# given: lat1, lon1, b = bearing in degrees, d = distance in kilometers
-#def reverseDhaversine(lat1,lon1,d,b):
-#origin = geopy.Point(lat1, lon1)
-#destination = VincentyDistance(kilometers=d).destination(origin, b)
-
-#lat2, lon2 = destination.latitude, destination.longitude
-
-    
+ 
 # example call
 latitude = 38.0000
 longitude = -97.0000
 radius = 50000
-
 hosp = getAllHospitalsWithinRange(latitude, longitude, radius);
 print(len(hosp))
+
+
 #reversehaversine(1,1,1,1)
 #res = getHospitalsWithinRange(latitude, longitude, radius, '');
 #result = fetchHospitalResult(res)
@@ -126,5 +117,6 @@ print(len(hosp))
 #print(len(result))
 #myhospitals = getAllHospitalsWithinRange(latitude, longitude, radius)
 #print(myhospitals)
+
 #if(res['status'] == 'REQUEST_DENIED'):
 #    print "REQUESTERROR: Please check you request"
