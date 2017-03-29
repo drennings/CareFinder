@@ -13,9 +13,11 @@ citycounter = 0
 files = {}
 wrongfiles = []
 goodfiles = []
+defaultUrl = '/'
 root = ''
+path = 'ny'
 # Traverse root directory, and list directories as dirs and files as files
-for root, dirs, files in os.walk("./collection/"):
+for root, dirs, files in os.walk(path):
     continue
 
 # Drop error files, keep good files
@@ -26,37 +28,35 @@ for filename in files:
         goodfiles.append(filename)
 
 for filename in goodfiles:
-    filename = './collection/' + filename
+    filename = path + '/' + filename
     with open(filename, 'r') as f:
         data = json.load(f)
-	
+
     response = data['response']
     citycounter += 1
-	
-    for venue in response['venues']:
-	    hospitalcounter += 1
-	    referralId = venue['referralId']
-	    name = venue['name']
-	    latitude = venue['location']['lat']
-	    longitude = venue['location']['lng']
-		
-	    contact = venue['contact']
-	    if not contact:
-	    	noContactcounter += 1
-	    else:
-	        #print contact
-				
-		url = '/'
-	    if 'url' not in venue:
-			noURLcounter += 1
-	    else:
-	        url = venue['url']
-		
-	    #sys.stdout.write("{0} - {1} - ({2}, {3}) - {4}".format(referralId, name, latitude, longitude, url))
 
-print("Amount of cities: {0}".format(len(files)))	
-print("Amount of cities inspected: {0}".format(citycounter))		
-print("Amount of cities NOT inspected: {0}".format(len(wrongfiles)-citycounter))	
+    for venue in response['venues']:
+            hospitalcounter += 1
+            referralId = venue['referralId']
+            name = venue['name']
+            latitude = venue['location']['lat']
+            longitude = venue['location']['lng']
+            contact = venue['contact']
+            if not contact:
+                noContactcounter += 1
+            url = defaultUrl
+            if 'url' not in venue:
+                noURLcounter += 1
+            else:
+                url = venue['url']
+                #print url
+
+            #sys.stdout.write("{0} - {1} - ({2}, {3}) - {4}".format(referralId, name, latitude, longitude, url))
+            print (name + "," + str(latitude) + "," + str(longitude) + "," + url)
+
+print("Amount of cities: {0}".format(len(files)))
+print("Amount of cities inspected: {0}".format(citycounter))
+print("Amount of cities NOT inspected: {0}".format(len(wrongfiles)-citycounter))
 
 print("Amount of (potential duplicate) hospitals found: {0}".format(hospitalcounter))
 print("Amount of (potential duplicate) hospitals that do not have a URL: {0}".format(noURLcounter))
