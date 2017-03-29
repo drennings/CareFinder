@@ -52,7 +52,7 @@ for filename in goodfiles:
                 #print url
 
             #sys.stdout.write("{0} - {1} - ({2}, {3}) - {4}".format(referralId, name, latitude, longitude, url))
-            print (name + "," + str(latitude) + "," + str(longitude) + "," + url)
+            print (name + "\t" + str(latitude) + "\t" + str(longitude) + "\t" + url)
 
 print("Amount of cities: {0}".format(len(files)))
 print("Amount of cities inspected: {0}".format(citycounter))
