@@ -1,5 +1,8 @@
 from urllib2 import urlopen
 from lxml import html
+import sys
+from threading import Thread
+import time
 
 def page(i): return 'https://www.northwell.edu/find-care/find-a-doctor?zip=New%20York&page=' + str(i)
 
@@ -41,6 +44,24 @@ def printDoctorsByPageTSV(start, end):
         for (name, relativePath) in getNameAndSubpage(i,i+1):
             (speciality, residencies) = getSpecialityAndResidencies(relativePath)
             rs = ', '.join(residencies)
-            print name + "\t" + speciality + "\t" + rs
+            print name + '\t' + speciality + '\t' + rs + '\t' + relativePath
+            sys.stdout.flush()
 
-printDoctorsByPageTSV(1,100)
+
+# Sequential
+# printDoctorsByPageTSV(1,100)
+# printDoctorsByPageTSV(100,200)
+# printDoctorsByPageTSV(200,300)
+# printDoctorsByPageTSV(300,400)
+# printDoctorsByPageTSV(400,500)
+# printDoctorsByPageTSV(500,600)
+# printDoctorsByPageTSV(600,660)
+
+# Concurrent
+Thread(target = printDoctorsByPageTSV, args = (1,100)).start()
+Thread(target = printDoctorsByPageTSV, args = (100,200)).start()
+Thread(target = printDoctorsByPageTSV, args = (200,300)).start()
+Thread(target = printDoctorsByPageTSV, args = (300,400)).start()
+Thread(target = printDoctorsByPageTSV, args = (400,500)).start()
+Thread(target = printDoctorsByPageTSV, args = (500,600)).start()
+Thread(target = printDoctorsByPageTSV, args = (600,660)).start()
