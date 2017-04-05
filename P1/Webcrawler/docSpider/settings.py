@@ -49,9 +49,9 @@ ROBOTSTXT_OBEY = False
 SPIDER_MIDDLEWARES = {
     'docSpider.middlewares.CoreNLP': 543,
 }
-FEED_EXPORT_FIELDS = ["result", 'url', 'text']
+FEED_EXPORT_FIELDS = ['name', 'text', 'url', 'result']
 
-STANFORD_NER_ENABLED = True
+STANFORD_NER_ENABLED = False
 STANFORD_NER_CLASSIFIER = 'C:\\Users\\Ron\\Tools\\stanford-ner-2016-10-31\\classifiers\\english.all.3class.distsim.crf.ser.gz'
 STANFORD_NER_JAR = 'C:\\Users\\Ron\\Tools\\stanford-ner-2016-10-31\\stanford-ner-3.7.0.jar'
 STANFORD_NER_FIELD_TO_PROCESS = ['div']
