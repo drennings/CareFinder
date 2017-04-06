@@ -15,7 +15,7 @@ type = 'hospital'
 try:
     key = sys.argv[1]
 except IndexError:
-    print "INDEXERROR: Please provide your API key"
+    print('INDEXERROR: Please provide your API key')
 
 # Return a list of jsonresults given the paramaters to Google Places
 def getHospitalsWithinRange(latitude, longitude, radius, nextpagetoken):
@@ -52,7 +52,7 @@ def fetchHospitalResult(jsonresultlist):
 
 # Get all hospitals within a square with center (latitude, longitude)
 # Through an exhaustive recursive call
-# Length of the box is sqrt(d^2/2) due to ABC formula
+# Length of the box is sqrt(d^2/2) due to ABC formula where d = 2*radius
 def getAllHospitalsWithinRange(latitude, longitude, radius):
     jsonresultlist = getHospitalsWithinRange(latitude, longitude, radius, '')
     hospitals = fetchHospitalResult(jsonresultlist)
@@ -62,10 +62,7 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
         print('found 60 or more hospitals!')
         halfradius = radius/2
         print(halfradius)
-        #brng = [22.5,67.5,112.5,157.5]
         brng = [45.0,135.0,225.0,315.0]
-        #brng = [45,90,135,180]
-        #brng = [90,180,270,360]
         for br in brng:
             print(br)
             (lat,lon) = reversehaversine(latitude,longitude,halfradius,br)
@@ -74,7 +71,6 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
         print("added " + str(len(res)) + " of " + str(len(hospitals)) + " current total hospitals ") 
         return hospitals
         
-        
     print("returning " + str(len(hospitals)) + " hospitals")        
     return hospitals
 
@@ -82,7 +78,7 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
 # current function is strongly based on http://stackoverflow.com/questions/7222382/get-lat-long-given-current-point-distance-and-bearing
 # bearing (in radians, clockwise from north)
 def reversehaversine(lat,lon,d,brng):
-    R = 6371.0      #Radius of the Earth from wikipedia
+    R = 6371.0      #Radius of the Earth from Wikipedia
     brng = math.radians(brng)
     d = d/1000
 
@@ -109,15 +105,6 @@ radius = 50000
 
 hosp = getAllHospitalsWithinRange(latitude, longitude, radius);
 print(len(hosp))
-
-
-#reversehaversine(1,1,1,1)
-#res = getHospitalsWithinRange(latitude, longitude, radius, '');
-#result = fetchHospitalResult(res)
-#print(result)
-#print(len(result))
-#myhospitals = getAllHospitalsWithinRange(latitude, longitude, radius)
-#print(myhospitals)
 
 #if(res['status'] == 'REQUEST_DENIED'):
 #    print "REQUESTERROR: Please check you request"
