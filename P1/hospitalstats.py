@@ -6,7 +6,8 @@ import tfidf
 from difflib import SequenceMatcher
 import Levenshtein
 
-
+# Initially created by Daan, modified by Marc
+# This function returns all the hospitals including lat/lon from the collected hospitals from FourSquare
 def getLocations(path, doPrint):
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
     sys.stderr = codecs.getwriter('utf8')(sys.stderr)
@@ -100,6 +101,7 @@ def mostSimilar(similarities):
 
 
 def main():
+    # Example
     locations = (getLocations('ny', False))
     #loadTfidf(locations) # doesnt work
     keys = [ k.lower() for k in locations ]

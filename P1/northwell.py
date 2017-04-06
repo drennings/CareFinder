@@ -69,24 +69,23 @@ def crawl():
     Thread(target = printDoctorsByPageTSV, args = (500,600)).start()
     Thread(target = printDoctorsByPageTSV, args = (600,660)).start()
 
-def mapNameToLocation(name):
-    locations = (hospitalstats.getLocations('ny', False))
-    #loadTfidf(locations) # doesnt work
-    keys = [ k for k in locations ]
-    return hospitalstats.mostSimilar(hospitalstats.ratcliffObershelpSimilarity(name, keys))
-    #print hospitalstats.mostSimilar(hospitalstats.levenshteinSimilarity(name.lower(), keys))
+def mapNameToLocation(name, locations):
+    #return hospitalstats.mostSimilar(hospitalstats.ratcliffObershelpSimilarity(name, locations))
+    return hospitalstats.mostSimilar(hospitalstats.levenshteinSimilarity(name, locations))
 
-def mapNamesToLocation(path):
+def mapNamesToLocation(path, threshold):
+    locations = (hospitalstats.getLocations('ny', False))
+    keys = [ k for k in locations ]
     with open(path,'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
             hospital = row[2]
-            mapping = mapNameToLocation(hospital)
-            if mapping[1] > 0.80:
+            mapping = mapNameToLocation(hospital, keys)
+            if mapping[1] > threshold:
                 print hospital + ': ' + str(mapping)
 
 def main():
     #crawl() # done
-    mapNamesToLocation('northwell.tsv')
+    mapNamesToLocation('northwell.tsv', 0.8)
 
 main()
