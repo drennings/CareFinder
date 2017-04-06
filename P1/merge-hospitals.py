@@ -49,36 +49,36 @@ for filename in goodfiles:
     filename = './collectionT/' + filename
     with open(filename, 'r') as f:
         data = json.load(f)
-	
+
     response = data['response']
     citycounter += 1
-	
+
     for venue in response['venues']:
 	    hospitalcounter += 1
 	    referralId = venue['referralId']
 	    name = venue['name']
 	    latitude = venue['location']['lat']
 	    longitude = venue['location']['lng']
-		
+
 	    contact = venue['contact']
 	    if not contact:
 	    	noContactcounter += 1
 	    else:
 	        #print contact
-				
+
 		url = '/'
 	    if 'url' not in venue:
 			noURLcounter += 1
 	    else:
 	        url = venue['url']
-		
+
 	    hospitalObject = {'referralId': referralId, 'name': name}
 	    storeHospital(hospitalObject)
 	    #sys.stdout.write("{0} - {1} - ({2}, {3}) - {4}".format(referralId, name, latitude, longitude, url))
 
-print("Amount of cities: {0}".format(len(files)))	
-print("Amount of cities inspected: {0}".format(citycounter))		
-print("Amount of cities NOT inspected: {0}".format(len(wrongfiles)-citycounter))	
+print("Amount of cities: {0}".format(len(files)))
+print("Amount of cities inspected: {0}".format(citycounter))
+print("Amount of cities NOT inspected: {0}".format(len(wrongfiles)-citycounter))
 
 print("Amount of (potential duplicate) hospitals found: {0}".format(hospitalcounter))
 print("Amount of (potential duplicate) hospitals that do not have a URL: {0}".format(noURLcounter))

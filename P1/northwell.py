@@ -3,6 +3,8 @@ from lxml import html
 import sys
 from threading import Thread
 import time
+import hospitalstats
+import csv
 
 def page(i): return 'https://www.northwell.edu/find-care/find-a-doctor?zip=New%20York&page=' + str(i)
 
@@ -48,20 +50,43 @@ def printDoctorsByPageTSV(start, end):
             sys.stdout.flush()
 
 
-# Sequential
-# printDoctorsByPageTSV(1,100)
-# printDoctorsByPageTSV(100,200)
-# printDoctorsByPageTSV(200,300)
-# printDoctorsByPageTSV(300,400)
-# printDoctorsByPageTSV(400,500)
-# printDoctorsByPageTSV(500,600)
-# printDoctorsByPageTSV(600,660)
+def crawl():
+    # Sequential
+    # printDoctorsByPageTSV(1,100)
+    # printDoctorsByPageTSV(100,200)
+    # printDoctorsByPageTSV(200,300)
+    # printDoctorsByPageTSV(300,400)
+    # printDoctorsByPageTSV(400,500)
+    # printDoctorsByPageTSV(500,600)
+    # printDoctorsByPageTSV(600,660)
 
-# Concurrent
-Thread(target = printDoctorsByPageTSV, args = (1,100)).start()
-Thread(target = printDoctorsByPageTSV, args = (100,200)).start()
-Thread(target = printDoctorsByPageTSV, args = (200,300)).start()
-Thread(target = printDoctorsByPageTSV, args = (300,400)).start()
-Thread(target = printDoctorsByPageTSV, args = (400,500)).start()
-Thread(target = printDoctorsByPageTSV, args = (500,600)).start()
-Thread(target = printDoctorsByPageTSV, args = (600,660)).start()
+    # Concurrent
+    Thread(target = printDoctorsByPageTSV, args = (1,100)).start()
+    Thread(target = printDoctorsByPageTSV, args = (100,200)).start()
+    Thread(target = printDoctorsByPageTSV, args = (200,300)).start()
+    Thread(target = printDoctorsByPageTSV, args = (300,400)).start()
+    Thread(target = printDoctorsByPageTSV, args = (400,500)).start()
+    Thread(target = printDoctorsByPageTSV, args = (500,600)).start()
+    Thread(target = printDoctorsByPageTSV, args = (600,660)).start()
+
+def mapNameToLocation(name):
+    locations = (hospitalstats.getLocations('ny', False))
+    #loadTfidf(locations) # doesnt work
+    keys = [ k for k in locations ]
+    return hospitalstats.mostSimilar(hospitalstats.ratcliffObershelpSimilarity(name, keys))
+    #print hospitalstats.mostSimilar(hospitalstats.levenshteinSimilarity(name.lower(), keys))
+
+def mapNamesToLocation(path):
+    with open(path,'rb') as tsvin:
+        tsvin = csv.reader(tsvin, delimiter='\t')
+        for row in tsvin:
+            hospital = row[2]
+            mapping = mapNameToLocation(hospital)
+            if mapping[1] > 0.80:
+                print hospital + ': ' + str(mapping)
+
+def main():
+    #crawl() # done
+    mapNamesToLocation('northwell.tsv')
+
+main()

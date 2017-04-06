@@ -40,8 +40,7 @@ def collectHospitalsFromCityFile(path):
                     json.dump(response, outfile)
 
 # 'cities-usa.tsv'
-def findLargestRectangleFromCityFile(path):
-    #with open("cities-usa.tsv",'rb') as tsvin:
+def findLargestRectangleFromCityFile(path, locationFilter):
     with open(path,'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         minLat = 1000
@@ -50,7 +49,7 @@ def findLargestRectangleFromCityFile(path):
         maxLon = -1000
         for row in tsvin:
             city = row[0]
-            if 'N.Y.' in city:
+            if locationFilter in city:
                 lat = convert(row[1])
                 lon = convert(row[2])
                 if (lat > 17.0 and lat < 90.0 and lon > -190.0 and lon < -55.13): # rough boundary around the us incl. alaska and hawaii
@@ -68,4 +67,24 @@ def findLargestRectangleFromCityFile(path):
         # west: -170.0,
         # east: -55.1333333333
 
-collectHospitalsFromCityFile('cities-usa.tsv')
+# returns dictionary with K:loaction V:(lat, lon)
+def getLocations(path, locationFilter):
+    locations = {}
+    with open(path,'rb') as tsvin:
+        tsvin = csv.reader(tsvin, delimiter='\t')
+        for row in tsvin:
+            city = row[0]
+            if locationFilter in city:
+                lat = convert(row[1])
+                lon = convert(row[2])
+                locations[city] = (lat, lon)
+        return locations
+
+
+def main():
+    #collectHospitalsFromCityFile('cities-usa.tsv')
+    #findLargestRectangleFromCityFile('cities-usa.tsv', 'N.Y.')
+    print getLocations('cities-usa.tsv', 'N.Y.')
+
+
+main()
