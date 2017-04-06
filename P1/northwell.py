@@ -79,13 +79,22 @@ def mapNamesToLocation(path, threshold):
     with open(path,'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
-            hospital = row[2]
-            mapping = mapNameToLocation(hospital, keys)
-            if mapping[1] > threshold:
-                print hospital + ': ' + str(mapping)
+            try:
+                name = row[0]
+                speciality = row[1]
+                hospital = row[2]
+                relativePath = row[3]
+                (mapped, ratio) = mapNameToLocation(hospital, keys)
+                (lat, lon) = locations[mapped]
+                if ratio > threshold:
+                    #print hospital + ': ' + str(mapped) + ', ' + str(ratio)
+                    print name + '\t' + speciality + '\t' + hospital + '\t' + mapped + '\t' + str(ratio) + '\t' + str(lat) + '\t' + str(lon)
+                    sys.stdout.flush()
+            except:
+                pass
 
 def main():
     #crawl() # done
-    mapNamesToLocation('northwell.tsv', 0.8)
+    mapNamesToLocation('northwell.tsv', 0.80)
 
 main()
