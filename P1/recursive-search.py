@@ -5,7 +5,7 @@ import requests
 import unicodedata
 import time
 import math
-
+from decimal import *
 # Chosen Google Places API Values for all calls
 key = ''
 output = 'json'
@@ -20,7 +20,7 @@ except IndexError:
 # Return a list of jsonresults given the paramaters to Google Places
 def getHospitalsWithinRange(latitude, longitude, radius, nextpagetoken):
     url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/' + output + '?location=' + str(latitude) + ',' + str(longitude) + '&radius=' + str(radius) +'&type=' + type + '&key=' + key + '&pagetoken=' + str(nextpagetoken)
-    print((50000/radius-1)*'\t' + url)
+    print(int((50000/radius-1))*'\t' + url)
     r = requests.get(url)
     jsonresult = r.json()
 
@@ -62,10 +62,10 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
         print('found 60 or more hospitals!')
         halfradius = radius/2
         print(halfradius)
-        brng = [45.0,135.0,225.0,315.0]
+        brng = [45,135,225,315]
         for br in brng:
             print(br)
-            (lat,lon) = reversehaversine(latitude,longitude,halfradius,br)
+            (lat,lon) = reversehaversine(latitude,longitude,halfradius,Decimal(br))
             res = getAllHospitalsWithinRange(lat,lon,halfradius)
             hospitals.extend(res)
         print("added " + str(len(res)) + " of " + str(len(hospitals)) + " current total hospitals ") 
@@ -77,20 +77,23 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
 # haversine formula reversed
 # current function is strongly based on http://stackoverflow.com/questions/7222382/get-lat-long-given-current-point-distance-and-bearing
 # bearing (in radians, clockwise from north)
+R = Decimal(6371.0)      #Radius of the Earth from Wikipedia
 def reversehaversine(lat,lon,d,brng):
-    R = 6371.0      #Radius of the Earth from Wikipedia
-    brng = math.radians(brng)
-    d = d/1000
+    brng = Decimal(math.radians(brng))
+    d = Decimal(d/1000)
 
-    lat1 = math.radians(float(lat)) #Current lat point converted to radians
-    lon1 = math.radians(float(lon)) #Current long point converted to radians
+    lat1 = math.radians(lat) #Current lat point converted to radians
+    lon1 = math.radians(lon) #Current long point converted to radians
 
     lat2 = math.asin( math.sin(lat1)*math.cos(d/R) + math.cos(lat1)*math.sin(d/R)*math.cos(brng))
+    print("lon1 = " + str(lon1))
+    print("brng = " + str(brng))
+    print("d/R = " + str(d/R))
+    print("lat1 = " + str(lat1))
+    lon2 = Decimal(lon1) + Decimal(math.atan2(Decimal(Decimal(math.sin(brng))*Decimal(math.sin(d/R))*Decimal(math.cos(lat1))), math.cos(d/R)-math.sin(lat1)*math.sin(lat2)))
     
-    lon2 = lon1 + math.atan2(math.sin(brng)*math.sin(d/R)*math.cos(lat1), math.cos(d/R)-math.sin(lat1)*math.sin(lat2))
-    
-    lat2 = math.degrees(lat2)
-    lon2 = math.degrees(lon2)
+    lat2 = Decimal(math.degrees(lat2))
+    lon2 = Decimal(math.degrees(lon2))
     
     print(lat2)
     print(lon2)   
@@ -99,9 +102,9 @@ def reversehaversine(lat,lon,d,brng):
     
  
 # example call
-latitude = 38.0000
-longitude = -97.0000
-radius = 50000
+latitude = Decimal(38.0000)
+longitude = Decimal(-97.0000)
+radius = Decimal(50000.0)
 
 hosp = getAllHospitalsWithinRange(latitude, longitude, radius);
 print(len(hosp))
