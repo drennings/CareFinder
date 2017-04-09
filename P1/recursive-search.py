@@ -6,12 +6,6 @@ import unicodedata
 import time
 import math
 
-#A = [];
-#B = None;
-#A.extend(['X'])
-#A.extend(B)
-#print(type(A))
-#print(A)
 # Chosen Google Places API Values for all calls
 key = ''
 output = 'json'
@@ -30,7 +24,7 @@ def getHospitalsWithinRange(latitude, longitude, radius, nextpagetoken):
     print url
     r = requests.get(url)
     jsonresult = r.json()   # dict object
-
+    
     if("next_page_token" in jsonresult):        # When a query has more than 20 results
         nextpagetoken = jsonresult['next_page_token']
         #print((50000/radius-1)*'\t' + url+str(nextpagetoken))
@@ -78,7 +72,7 @@ def getAllHospitalsWithinRange(latitude, longitude, radius):
 			(lat,lon) = reversehaversine(latitude,longitude,radius,br)
 			res = getAllHospitalsWithinRange(lat,lon,radius)
 			localhospitals.extend(res)
-		#print("added " + str(len(res)) + " of " + str(len(localhospitals)) + " current total hospitals ") 
+		print("added " + str(len(res)) + " of " + str(len(localhospitals)) + " current total hospitals ") 
 		return localhospitals
 	else:
 		print("returning " + str(len(hospitals)) + " hospitals")        
@@ -113,8 +107,10 @@ def getMyHospitals(latitude, longitude, radius):
     hosps = []
     if(radius <= 50000):
         print('found radius <= 50000!')
-        hosps = getAllHospitalsWithinRange(latitude,longitude,radius)
-        print(hosps)
+        res = getAllHospitalsWithinRange(latitude,longitude,radius)
+        print(type(res))
+        hosps.extend(res)
+        return hosps;
     else:	
         print('found radius > 50000!')
         radius = radius/2
@@ -127,30 +123,23 @@ def getMyHospitals(latitude, longitude, radius):
             hosps.extend(res)
 	return hosps;
 
-def writeToFile(data, pathToFile):
+def writeUniqueIDsToFile(data, pathToFile):
     with open(pathToFile,'wb') as tsvout:
 		tsvout = csv.writer(tsvout, delimiter='\t')
-		tsvout.writerow(data[0].keys())
-		for hospital in data:
-			print(hospital)
-			print(type(hospital))
-			tsvout.writerow(hospital.values())
-			#for key,value in hospital.items():
-			#	print key
-			#	print value
-			#	tsvout.writerow([key,value])
+		print("Original set size (with duplicates) = " + str(len(data)) )
+		idList = [];
+ 		for hospital in data:
+			idList.append(hospital.get('place_id'))
+		idSet = set(idList);
+		print("New set size (without duplicates = " + str(len(idSet)) )
+		for id in idSet:
+			tsvout.writerow([id]) #write complete ID in first column
 			
 
-    
 # example call
 latitude = 38.0000
 longitude = -97.0000
 radius = 50000
-
-# call for NY
-latitude = 40.730610
-longitude = -73.935242
-radius = 200000
 
 # example call - 0 hospitals
 latitude = 38.0000
@@ -166,13 +155,20 @@ radius = 30000
 latitude = 38.0000
 longitude = -97.0000
 radius = 24000
-    
+
+# call for NY
+latitude = 40.730610
+longitude = -73.935242
+radius = 200000
+
+# MAIN function calls
 hosp = [];
-#hosp.extend(getMyHospitals(latitude, longitude, radius));
-hosp.extend(getAllHospitalsWithinRange(latitude, longitude, radius));
-writeToFile(hosp,'myhospitals.tsv')
-print(hosp)
-print(len(hosp))
+hosp.extend(getMyHospitals(latitude, longitude, radius));
+#hosp.extend(getAllHospitalsWithinRange(latitude, longitude, radius));
+print('Found ' + str(len(hosp)) + " hospitals")
+writeUniqueIDsToFile(hosp, 'hospitalIDs.tsv')
+
+
 #t = type(hosp)
 #print t
 
