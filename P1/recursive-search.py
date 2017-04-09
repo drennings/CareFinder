@@ -6,10 +6,16 @@ import unicodedata
 import time
 import math
 
+#A = [];
+#B = None;
+#A.extend(['X'])
+#A.extend(B)
+#print(type(A))
+#print(A)
 # Chosen Google Places API Values for all calls
 key = ''
 output = 'json'
-type = 'hospital'
+entityType = 'hospital'
 
 # Get user key if provided, else ask for it
 try:
@@ -19,10 +25,11 @@ except IndexError:
 
 # Return a list of jsonresults given the paramaters to Google Places
 def getHospitalsWithinRange(latitude, longitude, radius, nextpagetoken):
-    url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/' + output + '?location=' + str(latitude) + ',' + str(longitude) + '&radius=' + str(radius) +'&type=' + type + '&key=' + key + '&pagetoken=' + str(nextpagetoken)
-    print((50000/radius-1)*'\t' + url)
+    url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/' + output + '?location=' + str(latitude) + ',' + str(longitude) + '&radius=' + str(radius) +'&type=' + entityType + '&key=' + key + '&pagetoken=' + str(nextpagetoken)
+    #print((50000/radius-1)*'\t' + url)	
+    print url
     r = requests.get(url)
-    jsonresult = r.json()
+    jsonresult = r.json()   # dict object
 
     if("next_page_token" in jsonresult):        # When a query has more than 20 results
         nextpagetoken = jsonresult['next_page_token']
@@ -54,29 +61,28 @@ def fetchHospitalResult(jsonresultlist):
 # Through an exhaustive recursive call
 # Length of the box is sqrt(d^2/2) due to ABC formula
 def getAllHospitalsWithinRange(latitude, longitude, radius):
-    jsonresultlist = getHospitalsWithinRange(latitude, longitude, radius, '')
-    hospitals = fetchHospitalResult(jsonresultlist)
-    print("(" + str(latitude) + "," + str(longitude) + ")")
-    
-    if len(hospitals) == 60:
-        print('found 60 or more hospitals!')
-        halfradius = radius/2
-        print(halfradius)
-        #brng = [22.5,67.5,112.5,157.5]
-        brng = [45.0,135.0,225.0,315.0]
-        #brng = [45,90,135,180]
-        #brng = [90,180,270,360]
-        for br in brng:
-            print(br)
-            (lat,lon) = reversehaversine(latitude,longitude,halfradius,br)
-            res = getAllHospitalsWithinRange(lat,lon,halfradius)
-            hospitals.extend(res)
-        print("added " + str(len(res)) + " of " + str(len(hospitals)) + " current total hospitals ") 
-        return hospitals
-        
-        
-    print("returning " + str(len(hospitals)) + " hospitals")        
-    return hospitals
+	jsonresultlist = getHospitalsWithinRange(latitude, longitude, radius, '')
+	hospitals = fetchHospitalResult(jsonresultlist)
+	print("(" + str(latitude) + "," + str(longitude) + ")")
+	if len(hospitals) == 60:
+		print('found 60 or more hospitals!')
+		radius = radius/2
+		print(radius)
+		#brng = [22.5,67.5,112.5,157.5]
+		brng = [45.0,135.0,225.0,315.0]
+		#brng = [45,90,135,180]
+		#brng = [90,180,270,360]
+		localhospitals = []
+		for br in brng:
+			print(br)
+			(lat,lon) = reversehaversine(latitude,longitude,radius,br)
+			res = getAllHospitalsWithinRange(lat,lon,radius)
+			localhospitals.extend(res)
+		#print("added " + str(len(res)) + " of " + str(len(localhospitals)) + " current total hospitals ") 
+		return localhospitals
+	else:
+		print("returning " + str(len(hospitals)) + " hospitals")        
+		return hospitals
 
 # haversine formula reversed
 # current function is strongly based on http://stackoverflow.com/questions/7222382/get-lat-long-given-current-point-distance-and-bearing
@@ -100,15 +106,77 @@ def reversehaversine(lat,lon,d,brng):
     print(lon2)   
     
     return (lat2, lon2)
+
+# Get all hospitals within a square with center (latitude, longitude)
+# Through an exhaustive recursive call
+def getMyHospitals(latitude, longitude, radius):
+    hosps = []
+    if(radius <= 50000):
+        print('found radius <= 50000!')
+        hosps = getAllHospitalsWithinRange(latitude,longitude,radius)
+        print(hosps)
+    else:	
+        print('found radius > 50000!')
+        radius = radius/2
+        print(radius)
+        brng = [45.0,135.0,225.0,315.0]
+        for br in brng:
+            print(br)
+            (lat,lon) = reversehaversine(latitude,longitude,radius,br)
+            res = getAllHospitalsWithinRange(lat,lon,radius)
+            hosps.extend(res)
+	return hosps;
+
+def writeToFile(data, pathToFile):
+    with open(pathToFile,'wb') as tsvout:
+		tsvout = csv.writer(tsvout, delimiter='\t')
+		tsvout.writerow(data[0].keys())
+		for hospital in data:
+			print(hospital)
+			print(type(hospital))
+			tsvout.writerow(hospital.values())
+			#for key,value in hospital.items():
+			#	print key
+			#	print value
+			#	tsvout.writerow([key,value])
+			
+
     
- 
 # example call
 latitude = 38.0000
 longitude = -97.0000
 radius = 50000
 
-hosp = getAllHospitalsWithinRange(latitude, longitude, radius);
+# call for NY
+latitude = 40.730610
+longitude = -73.935242
+radius = 200000
+
+# example call - 0 hospitals
+latitude = 38.0000
+longitude = -97.0000
+radius = 10000
+
+# example call - 10 hospitals
+latitude = 38.0000
+longitude = -97.0000
+radius = 30000
+
+# example call - 2 hospitals
+latitude = 38.0000
+longitude = -97.0000
+radius = 24000
+    
+hosp = [];
+#hosp.extend(getMyHospitals(latitude, longitude, radius));
+hosp.extend(getAllHospitalsWithinRange(latitude, longitude, radius));
+writeToFile(hosp,'myhospitals.tsv')
+print(hosp)
 print(len(hosp))
+#t = type(hosp)
+#print t
+
+
 
 
 #reversehaversine(1,1,1,1)
