@@ -5,6 +5,7 @@ import requests
 import unicodedata
 import time
 import math
+#from unidecode import unidecode
 
 # Chosen Google Places API Values for all calls
 key = ''
@@ -17,16 +18,16 @@ i = 0;
 try:
     key = sys.argv[1]
 except IndexError:
-    print "INDEXERROR: Please provide your API key"
+    print ("INDEXERROR: Please provide your API key")
 
 # Return the jsonresult given by Google Places for the placeID
 def getHospitalDetails(placeID):
     url = 'https://maps.googleapis.com/maps/api/place/details/' + output + '?placeid=' + str(placeID) + '&key=' + key	
-    print url
+    print( url )
     r = requests.get(url)
     jsonresult = r.json()   # dict object
     if(jsonresult['status'] != 'OK'):
-        print 'ERROR: ' +  jsonresult['status'] + ' / ' + jsonresult['error_message'] + ' @ ' + url
+        print( 'ERROR: ' +  jsonresult['status'] + ' / ' + jsonresult['error_message'] + ' @ ' + url )
     return jsonresult;
 
 # Write data headers
@@ -56,26 +57,33 @@ def getNeededDetails(allDetails):
     
 # Return a list of jsonresults given the paramaters to Google Places
 def writeHospitalDetails(pathToSource,pathToDestination):           # TODO fix good entry in wb
-    with open(pathToSource, 'r') as tsvin, open(pathToDestination,'a') as tsvout:
-		tsvin = csv.reader(tsvin, delimiter='\t')
-		tsvout = csv.writer(tsvout, delimiter='\t')
+    with open(pathToSource, 'r') as tsvin, open(pathToDestination,'ab') as tsvout:
+        tsvin = csv.reader(tsvin, delimiter='\t')
+        tsvout = csv.writer(tsvout, delimiter='\t')
         
-		for entry in tsvin:
-			global i 
-			i = i + 1
-			print i     # show at which entry we are
-			placeID = entry[0]
-			#print(placeID)
-			hospitalDetails = getHospitalDetails(placeID);
-			#print(hospitalDetails)
-			neededDetails = getNeededDetails(hospitalDetails);
-			#print(neededDetails)
-			tsvout.writerow(neededDetails)
-
+        for entry in tsvin:
+            global i 
+            i = i + 1
+            print("Acquiring details of entry " + str(i))     # show at which entry we are
+            placeID = entry[0]
+            #print(placeID)
+            hospitalDetails = getHospitalDetails(placeID);
+            print(hospitalDetails)
+            neededDetails = getNeededDetails(hospitalDetails);
+            print(neededDetails)
+            try:
+                tsvout.writerow(neededDetails)
+            except UnicodeEncodeError:
+                tsvout.writerow([placeID])
+                print( "UnicodeEncodeError for id: " + str(placeID));
 # MAIN code
-headers = ['place_id', 'name', 'formatted_address', 'latitude', 'longitude', 'formatted_phone_number', 'international_phone_number', 'website', 'opening_hours', 'permanently_closed', 'price_level', 'rating', 'url', 'utc_offset', 'vicinity'] 
-pathToDestination = 'details.tsv'
-pathToSource = 'header.tsv'
+headers = ['place_id', 'name', 'formatted_address', 'latitude', 'longitude', 'formatted_phone_number', 'international_phone_number', 'website', 'permanently_closed', 'opening_hours', 'price_level', 'rating', 'url', 'utc_offset', 'vicinity'] 
+
+pathToDestination = 'allHospitalDetails_in_NY.tsv'
+pathToSource = 'allHospitalIDs_in_NY.tsv'
+
+#pathToDestination = 'NY-40-50details.tsv'
+#pathToSource = 'hospitalIDs_in_NY-40-50.tsv'
 writeHeaders(pathToDestination, headers)
 writeHospitalDetails(pathToSource,pathToDestination)
 

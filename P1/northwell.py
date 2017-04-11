@@ -1,10 +1,10 @@
 from urllib2 import urlopen
-from lxml import html
 import sys
 from threading import Thread
 import time
 import hospitalstats
 import csv
+from lxml import html
 
 def page(i): return 'https://www.northwell.edu/find-care/find-a-doctor?zip=New%20York&page=' + str(i)
 
@@ -74,7 +74,7 @@ def mapNameToLocation(name, locations):
     return hospitalstats.mostSimilar(hospitalstats.levenshteinSimilarity(name, locations))
 
 def mapNamesToLocation(path, threshold):
-    locations = (hospitalstats.getLocations('ny', False))
+    locations = (hospitalstats.getLocations('ny', False, 'allHospitalDetails_in_NY-filtered.tsv'))
     keys = [ k for k in locations ]
     with open(path,'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
