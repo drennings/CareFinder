@@ -74,10 +74,15 @@ def mapNameToLocation(name, locations):
     return hospitalstats.mostSimilar(hospitalstats.levenshteinSimilarity(name, locations))
 
 def mapNamesToLocation(path, threshold):
+    import pandas as pd
+    doctors = pd.read_excel('current_data.xlsx')
+    
     locations = (hospitalstats.getLocations('ny', False, 'allHospitalDetails_in_NY-filtered.tsv'))
     keys = [ k for k in locations ]
+    print keys
     with open(path,'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
+        i = 0;
         for row in tsvin:
             try:
                 name = row[0]
@@ -89,10 +94,21 @@ def mapNamesToLocation(path, threshold):
                 if ratio > threshold:
                     #print hospital + ': ' + str(mapped) + ', ' + str(ratio)
                     print name + '\t' + speciality + '\t' + hospital + '\t' + mapped + '\t' + str(ratio) + '\t' + str(lat) + '\t' + str(lon)
-                    sys.stdout.flush()
+                    #sys.stdout.flush()
+                    doctors.loc[i,'Name'] = name
+                    doctors.loc[i,'Spec'] = speciality
+                    doctors.loc[i,'Hosp'] = hospital
+                    doctors.loc[i,'lat'] = lat
+                    doctors.loc[i,'lon'] = lon
+                i = i + 1;
             except:
                 pass
-
+    writer = pd.ExcelWriter('current_data.xlsx', engine='xlsxwriter')
+    doctors.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
+    print doctors
+    return
+    
 def main():
     #crawl() # done
     mapNamesToLocation('northwell.tsv', 0.80)
