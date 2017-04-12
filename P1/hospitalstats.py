@@ -71,20 +71,20 @@ def getFourSquareLocations(path, doPrint):
         print("Amount of (potential duplicate) hospitals found: {0}".format(hospitalcounter))
         print("Amount of (potential duplicate) hospitals that do not have a URL: {0}".format(noURLcounter))
         print("Amount of (potential duplicate) hospitals with NO contact details: {0}".format(noContactcounter))
-    
+
     return locations
 
 def getGooglePlacesLocations(path):
     f = codecs.open(path, 'rU','utf-8')
     tsvin = csv.reader(f, delimiter='\t')
     locations = {};
-            
+
     for entry in tsvin:
         name = entry[1]
         latitude = entry[3]
         longitude = entry[4]
         locations[name] = (latitude, longitude)
-        
+
     return locations
 
 def getLocations(foursquarePath, doPrint, googlePath):
@@ -93,7 +93,7 @@ def getLocations(foursquarePath, doPrint, googlePath):
     locations = locationsFourSquare.copy();
     #locations.update(locationsGooglePlaces);
     return locations
-    
+
 # Doesnt seem to work
 def loadTfidf(locations):
     table = tfidf.tfidf()
@@ -131,4 +131,4 @@ def main():
     print mostSimilar(ratcliffObershelpSimilarity(toFind.lower(), keys))
     print mostSimilar(levenshteinSimilarity(toFind.lower(), keys))
 
-main()
+#main()

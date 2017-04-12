@@ -61,12 +61,18 @@ def crawl():
     # printDoctorsByPageTSV(600,660)
 
     # Concurrent
-    Thread(target = printDoctorsByPageTSV, args = (1,100)).start()
-    Thread(target = printDoctorsByPageTSV, args = (100,200)).start()
-    Thread(target = printDoctorsByPageTSV, args = (200,300)).start()
-    Thread(target = printDoctorsByPageTSV, args = (300,400)).start()
-    Thread(target = printDoctorsByPageTSV, args = (400,500)).start()
-    Thread(target = printDoctorsByPageTSV, args = (500,600)).start()
+    Thread(target = printDoctorsByPageTSV, args = (1,50)).start()
+    Thread(target = printDoctorsByPageTSV, args = (50,100)).start()
+    Thread(target = printDoctorsByPageTSV, args = (100,150)).start()
+    Thread(target = printDoctorsByPageTSV, args = (150,200)).start()
+    Thread(target = printDoctorsByPageTSV, args = (200,250)).start()
+    Thread(target = printDoctorsByPageTSV, args = (250,300)).start()
+    Thread(target = printDoctorsByPageTSV, args = (300,350)).start()
+    Thread(target = printDoctorsByPageTSV, args = (350,400)).start()
+    Thread(target = printDoctorsByPageTSV, args = (400,450)).start()
+    Thread(target = printDoctorsByPageTSV, args = (450,500)).start()
+    Thread(target = printDoctorsByPageTSV, args = (500,550)).start()
+    Thread(target = printDoctorsByPageTSV, args = (550,600)).start()
     Thread(target = printDoctorsByPageTSV, args = (600,660)).start()
 
 def mapNameToLocation(name, locations):
@@ -80,7 +86,6 @@ def mapNamesToLocation(path, threshold, writeToFile):
 
     locations = (hospitalstats.getLocations('ny', False, 'allHospitalDetails_in_NY-filtered.tsv'))
     keys = [ k for k in locations ]
-    print keys
     with open(path,'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         i = 0;
@@ -88,20 +93,21 @@ def mapNamesToLocation(path, threshold, writeToFile):
             try:
                 name = row[0]
                 speciality = row[1]
-                hospital = row[2]
+                hospitals = row[2].split(',')
                 relativePath = row[3]
-                (mapped, ratio) = mapNameToLocation(hospital, keys)
-                (lat, lon) = locations[mapped]
-                if ratio > threshold:
-                    #print hospital + ': ' + str(mapped) + ', ' + str(ratio)
-                    print name + '\t' + speciality + '\t' + hospital + '\t' + mapped + '\t' + str(ratio) + '\t' + str(lat) + '\t' + str(lon)
-                    sys.stdout.flush()
-                    if writeToFile:
-                        doctors.loc[i,'Name'] = name
-                        doctors.loc[i,'Spec'] = speciality
-                        doctors.loc[i,'Hosp'] = hospital
-                        doctors.loc[i,'lat'] = lat
-                        doctors.loc[i,'lon'] = lon
+                for hospital in hospitals:
+                    (mapped, ratio) = mapNameToLocation(hospital, keys)
+                    (lat, lon) = locations[mapped]
+                    if ratio > threshold:
+                        #print hospital + ': ' + str(mapped) + ', ' + str(ratio)
+                        print name + '\t' + speciality + '\t' + hospital + '\t' + mapped + '\t' + str(ratio) + '\t' + str(lat) + '\t' + str(lon)
+                        sys.stdout.flush()
+                        if writeToFile:
+                            doctors.loc[i,'Name'] = name
+                            doctors.loc[i,'Spec'] = speciality
+                            doctors.loc[i,'Hosp'] = hospital
+                            doctors.loc[i,'lat'] = lat
+                            doctors.loc[i,'lon'] = lon
                 i = i + 1;
             except:
                 pass
