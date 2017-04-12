@@ -25,14 +25,14 @@ def getNameAndSubpage(start, end):
 
 # Subpage scan
 # Extracts speciality and residencies
-def getSpecialityAndResidencies(relativePath):
+def getSpecialityAndAffiliations(relativePath):
     data = str(urlopen(subpage(relativePath)).read())
     tree = html.fromstring(data)
     speciality = map(lambda s: s.strip(), tree.xpath('.//*[@id="main"]/div/div[1]/div/div[2]/div[1]/div/p[1]/text()'))[0]
     # one doctor might have multiple residencies
     residencies = []
     i = 1
-    residency = lambda i: tree.xpath('//*[@id="section-credentials"]/ul[3]/li['+str(i)+']/text()')
+    residency = lambda i: tree.xpath('//*[@id="section-credentials"]/ul[5]/li['+str(i)+']/text()')
     r = residency(1)
     while r:
         residencies = residencies + r
@@ -44,7 +44,7 @@ def getSpecialityAndResidencies(relativePath):
 def printDoctorsByPageTSV(start, end):
     for i in range(start, end):
         for (name, relativePath) in getNameAndSubpage(i,i+1):
-            (speciality, residencies) = getSpecialityAndResidencies(relativePath)
+            (speciality, residencies) = getSpecialityAndAffiliations(relativePath)
             rs = ', '.join(residencies)
             print name + '\t' + speciality + '\t' + rs + '\t' + relativePath
             sys.stdout.flush()
