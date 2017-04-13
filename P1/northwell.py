@@ -32,7 +32,7 @@ def getSpecialityAndResidencies(relativePath):
     # one doctor might have multiple residencies
     residencies = []
     i = 1
-    residency = lambda i: tree.xpath('//*[@id="section-credentials"]/ul[3]/li['+str(i)+']/text()')
+    residency = lambda i: tree.xpath('//*[@id="section-locations-and-insurance"]/ul[3]/li['+str(i)+']/text()')
     r = residency(1)
     while r:
         residencies = residencies + r
@@ -79,7 +79,6 @@ def mapNamesToLocation(path, threshold):
     
     locations = (hospitalstats.getLocations('ny', False, 'allHospitalDetails_in_NY-filtered.tsv'))
     keys = [ k for k in locations ]
-    print keys
     with open(path,'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         i = 0;
@@ -93,16 +92,23 @@ def mapNamesToLocation(path, threshold):
                 (lat, lon) = locations[mapped]
                 if ratio > threshold:
                     #print hospital + ': ' + str(mapped) + ', ' + str(ratio)
-                    print name + '\t' + speciality + '\t' + hospital + '\t' + mapped + '\t' + str(ratio) + '\t' + str(lat) + '\t' + str(lon)
+                    #print name + '\t' + speciality + '\t' + hospital + '\t' + mapped + '\t' + str(ratio) + '\t' + str(lat) + '\t' + str(lon)
                     #sys.stdout.flush()
                     doctors.loc[i,'Name'] = name
                     doctors.loc[i,'Spec'] = speciality
                     doctors.loc[i,'Hosp'] = hospital
                     doctors.loc[i,'lat'] = lat
                     doctors.loc[i,'lon'] = lon
+                else:
+                    doctors.loc[i,'Name'] = name
+                    doctors.loc[i,'Spec'] = speciality
+                    doctors.loc[i,'Hosp'] = hospital     
+                    (lat, lon) = 
                 i = i + 1;
+                print str(i) + str(name) + str(speciality) + str(hospital) + str(lat) + str(lon) + str(ratio)
             except:
-                pass
+                print "ERROR " + str(i)
+                pass;
     writer = pd.ExcelWriter('current_data.xlsx', engine='xlsxwriter')
     doctors.to_excel(writer, sheet_name='Sheet1')
     writer.save()
